@@ -20,28 +20,24 @@
 #include <string>
 #include "dynamic_vino_lib/models/object_detection_model.hpp"
 #include "dynamic_vino_lib/slog.hpp"
+
 // Validated Object Detection Network
 Models::ObjectDetectionModel::ObjectDetectionModel(const std::string& model_loc,
                                                int input_num, int output_num,
                                                int max_batch_size)
     : BaseModel(model_loc, input_num, output_num, max_batch_size){}
+
 void Models::ObjectDetectionModel::setLayerProperty(
     InferenceEngine::CNNNetReader::Ptr net_reader) {
   // set input property
   InferenceEngine::InputsDataMap input_info_map(
       net_reader->getNetwork().getInputsInfo());
-  if (input_info_map.size() != 1) {
-    throw std::logic_error("This sample accepts networks having only one input");
-  }
   InferenceEngine::InputInfo::Ptr input_info = input_info_map.begin()->second;
   input_info->setPrecision(InferenceEngine::Precision::U8);
   input_info->getInputData()->setLayout(InferenceEngine::Layout::NCHW);
   // set output property
   InferenceEngine::OutputsDataMap output_info_map(
       net_reader->getNetwork().getOutputsInfo());
-  if (output_info_map.size() != 1) {
-    throw std::logic_error("This sample accepts networks having only one output");
-  }
   InferenceEngine::DataPtr& output_data_ptr = output_info_map.begin()->second;
   output_data_ptr->setPrecision(InferenceEngine::Precision::FP32);
   output_data_ptr->setLayout(InferenceEngine::Layout::NCHW);
@@ -49,15 +45,12 @@ void Models::ObjectDetectionModel::setLayerProperty(
   input_ = input_info_map.begin()->first;
   output_ = output_info_map.begin()->first;
 }
+
 void Models::ObjectDetectionModel::checkLayerProperty(
     const InferenceEngine::CNNNetReader::Ptr& net_reader) {
   slog::info << "Checking Object Detection outputs" << slog::endl;
   InferenceEngine::OutputsDataMap output_info_map(
       net_reader->getNetwork().getOutputsInfo());
-  slog::info << "Checking Object Detection outputs ..." << slog::endl;
-  if (output_info_map.size() != 1) {
-    throw std::logic_error("This sample accepts networks having only one output");
-  }
   InferenceEngine::DataPtr& output_data_ptr = output_info_map.begin()->second;
   output_ = output_info_map.begin()->first;
   slog::info << "Checking Object Detection output ... Name=" << output_ << slog::endl;

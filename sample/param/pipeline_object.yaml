@@ -1,22 +1,27 @@
 Pipelines:
 - name: object
-  inputs: [RealSenseCamera]
+  inputs: [StandardCamera]
   infers:
     - name: ObjectDetection
-      model: /opt/intel/computer_vision_sdk/deployment_tools/intel_models/person-vehicle-bike-detection-crossroad-0078/FP32/person-vehicle-bike-detection-crossroad-0078.xml
-      engine: CPU
+      model: /opt/intel/computer_vision_sdk/deployment_tools/intel_models/person-detection-retail-0013/FP16/person-detection-retail-0013.xml
+      engine: MYRIAD
       label: to/be/set/xxx.labels
       batch: 16
-  outputs: [ImageWindow, RosTopic, RViz]
+    - name: PersonReidentification
+      model: /opt/intel/computer_vision_sdk/deployment_tools/intel_models/person-reidentification-retail-0076/FP16/person-reidentification-retail-0076.xml
+      engine: MYRIAD
+      label: to/be/set/xxx.labels
+      batch: 16
+  outputs: [ImageWindow, RViz]
   confidence_threshold: 0.2
   connects:
-    - left: RealSenseCamera
+    - left: StandardCamera
       right: [ObjectDetection]
     - left: ObjectDetection
+      right: [PersonReidentification]
+    - left: PersonReidentification
       right: [ImageWindow]
-    - left: ObjectDetection
-      right: [RosTopic]
-    - left: ObjectDetection
+    - left: PersonReidentification
       right: [RViz]
 
 OpenvinoCommon:

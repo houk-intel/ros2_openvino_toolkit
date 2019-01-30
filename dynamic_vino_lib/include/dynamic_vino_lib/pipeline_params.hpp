@@ -53,6 +53,7 @@ extern const std::string kInferTpye_EmotionRecognition;
 extern const std::string kInferTpye_HeadPoseEstimation;
 extern const std::string kInferTpye_ObjectDetection;
 extern const std::string kInferTpye_ObjectSegmentation;
+extern const std::string kInferTpye_PersonReidentification; 
 
 /**
  * @class PipelineParams

@@ -14,20 +14,16 @@
  * limitations under the License.
  */
 /**
- * @brief A header file with declaration for ObjectDetection Class
- * @file object_detection.hpp
+ * @brief A header file with declaration for PersonReidentification Class
+ * @file person_reidentification.hpp
  */
-#ifndef DYNAMIC_VINO_LIB__INFERENCES__OBJECT_DETECTION_HPP_
-#define DYNAMIC_VINO_LIB__INFERENCES__OBJECT_DETECTION_HPP_
+#ifndef DYNAMIC_VINO_LIB__INFERENCES__PERSON_REIDENTIFICATION_HPP_
+#define DYNAMIC_VINO_LIB__INFERENCES__PERSON_REIDENTIFICATION_HPP_
+#include <rclcpp/rclcpp.hpp>
 #include <memory>
 #include <vector>
 #include <string>
-#include <rclcpp/rclcpp.hpp>
-#include <object_msgs/msg/object.hpp>
-#include <object_msgs/msg/object_in_box.hpp>
-#include <object_msgs/msg/objects_in_boxes.hpp>
-#include <object_msgs/srv/detect_object.hpp>
-#include "dynamic_vino_lib/models/object_detection_model.hpp"
+#include "dynamic_vino_lib/models/person_reidentification_model.hpp"
 #include "dynamic_vino_lib/engines/engine.hpp"
 #include "dynamic_vino_lib/inferences/base_inference.hpp"
 #include "inference_engine.hpp"
@@ -35,36 +31,30 @@
 // namespace
 namespace dynamic_vino_lib {
 /**
- * @class ObjectDetectionResult
+ * @class PersonReidentificationResult
  * @brief Class for storing and processing face detection result.
  */
-class ObjectDetectionResult : public Result {
+class PersonReidentificationResult : public Result {
  public:
-  friend class ObjectDetection;
-  explicit ObjectDetectionResult(const cv::Rect& location);
-  std::string getLabel() const { return label_; }
-  /**
-   * @brief Get the confidence that the detected area is a face.
-   * @return The confidence value. 
-   */
-  float getConfidence() const { return confidence_; }
+  friend class PersonReidentification;
+  explicit PersonReidentificationResult(const cv::Rect& location);
+  std::string getPersonID() const { return person_id_; }
  private:
-  std::string label_ = "";
-  float confidence_ = -1;
+  std::string person_id_ = "No.#";
 };
 /**
- * @class ObjectDetection
+ * @class PersonReidentification
  * @brief Class to load face detection model and perform face detection.
  */
-class ObjectDetection : public BaseInference {
+class PersonReidentification : public BaseInference {
  public:
-  using Result = dynamic_vino_lib::ObjectDetectionResult;
-  explicit ObjectDetection(double);
-  ~ObjectDetection() override;
+  using Result = dynamic_vino_lib::PersonReidentificationResult;
+  explicit PersonReidentification(double);
+  ~PersonReidentification() override;
   /**
    * @brief Load the face detection model.
    */
-  void loadNetwork(std::shared_ptr<Models::ObjectDetectionModel>);
+  void loadNetwork(std::shared_ptr<Models::PersonReidentificationModel>);
   /**
    * @brief Enqueue a frame to this class.
    * The frame will be buffered but not infered yet.
@@ -107,15 +97,24 @@ class ObjectDetection : public BaseInference {
    * @return The name of the Inference instance.
    */
   const std::string getName() const override;
+  /**
+   * @brief Calculate the similarity between a new detected person with 
+   * the already recorded persons. 
+   * @return The similarity value.
+   */
+  float calcSimilarity(const std::vector<float>&, const std::vector<float>&);
+  /**
+   * @brief Try to find the matched person from the recorded persons, if there are not,
+   * record it in the recorded persons. 
+   * @return The id of the matched person (or the new person).
+   */
+  std::string findMatchPerson(const std::vector<float> &);
 
  private:
-  std::shared_ptr<Models::ObjectDetectionModel> valid_model_;
+  std::shared_ptr<Models::PersonReidentificationModel> valid_model_;
   std::vector<Result> results_;
-  int width_ = 0;
-  int height_ = 0;
-  int max_proposal_count_;
-  int object_size_;
-  double show_output_thresh_ = 0;
+  std::vector<std::vector<float>> recorded_persons_;
+  double match_thresh_ = 0;
 };
 }  // namespace dynamic_vino_lib
-#endif  // DYNAMIC_VINO_LIB__INFERENCES__OBJECT_DETECTION_HPP_
+#endif  // DYNAMIC_VINO_LIB__INFERENCES__PERSON_REIDENTIFICATION_HPP_

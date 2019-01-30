@@ -1,16 +1,16 @@
 Pipelines:
 - name: object
-  inputs: [RealSenseCamera]
+  inputs: [StandardCamera]
   infers:
     - name: ObjectDetection
-      model: /opt/openvino_toolkit/open_model_zoo/model_downloader/object_detection/common/ssd/300/caffe/output/ssd300.xml 
-      engine: CPU
+      model: /opt/intel/computer_vision_sdk/deployment_tools/intel_models/person-detection-retail-0013/FP32/person-detection-retail-0013.xml
       label: to/be/set/xxx.labels
+      engine: CPU
       batch: 16
   outputs: [ImageWindow, RosTopic, RViz]
   confidence_threshold: 0.2
   connects:
-    - left: RealSenseCamera
+    - left: StandardCamera
       right: [ObjectDetection]
     - left: ObjectDetection
       right: [ImageWindow]

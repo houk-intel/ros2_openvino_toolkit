@@ -49,7 +49,6 @@ bool dynamic_vino_lib::ObjectDetection::enqueue(const cv::Mat& frame,
     return false;
   }
   Result r(input_frame_loc);
-  results_.clear();
   results_.emplace_back(r);
   return true;
 }

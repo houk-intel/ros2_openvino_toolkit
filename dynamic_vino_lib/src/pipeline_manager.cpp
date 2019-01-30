@@ -30,6 +30,7 @@
 #include "dynamic_vino_lib/inferences/face_detection.hpp"
 #include "dynamic_vino_lib/inferences/head_pose_detection.hpp"
 #include "dynamic_vino_lib/inferences/object_segmentation.hpp"
+#include "dynamic_vino_lib/inferences/person_reidentification.hpp"
 #include "dynamic_vino_lib/inputs/base_input.hpp"
 #include "dynamic_vino_lib/inputs/image_input.hpp"
 #include "dynamic_vino_lib/inputs/realsense_camera.hpp"
@@ -41,6 +42,7 @@
 #include "dynamic_vino_lib/models/face_detection_model.hpp"
 #include "dynamic_vino_lib/models/head_pose_detection_model.hpp"
 #include "dynamic_vino_lib/models/object_segmentation_model.hpp"
+#include "dynamic_vino_lib/models/person_reidentification_model.hpp"
 #include "dynamic_vino_lib/outputs/image_window_output.hpp"
 #include "dynamic_vino_lib/outputs/ros_topic_output.hpp"
 #include "dynamic_vino_lib/outputs/rviz_output.hpp"
@@ -202,6 +204,9 @@ PipelineManager::parseInference(
     } else if (infer.name == kInferTpye_ObjectSegmentation) {
       object = createObjectSegmentation(infer);
 
+    } else if (infer.name == kInferTpye_PersonReidentification) {
+      object = createPersonReidentification(infer);
+
     } else {
       slog::err << "Invalid inference name: " << infer.name << slog::endl;
     }
@@ -298,6 +303,22 @@ PipelineManager::createObjectSegmentation(
   segmentation_inference_ptr->loadEngine(obejct_segmentation_engine);
 
   return segmentation_inference_ptr;
+}
+
+std::shared_ptr<dynamic_vino_lib::BaseInference>
+PipelineManager::createPersonReidentification(
+    const Params::ParamManager::InferenceParams& infer) {
+  auto person_reidentification_model =
+      std::make_shared<Models::PersonReidentificationModel>(infer.model, 1, 1, 16);
+  person_reidentification_model->modelInit();
+  auto person_reidentification_engine = std::make_shared<Engines::Engine>(
+      plugins_for_devices_[infer.engine], person_reidentification_model);
+  auto reidentification_inference_ptr = 
+    std::make_shared<dynamic_vino_lib::PersonReidentification>(0.6);
+  reidentification_inference_ptr->loadNetwork(person_reidentification_model);
+  reidentification_inference_ptr->loadEngine(person_reidentification_engine);
+
+  return reidentification_inference_ptr;
 }
 
 void PipelineManager::threadPipeline(const char* name) {

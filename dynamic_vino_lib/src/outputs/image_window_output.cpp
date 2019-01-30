@@ -32,6 +32,24 @@ Outputs::ImageWindowOutput::ImageWindowOutput(const std::string& window_name,
     : window_name_(window_name), focal_length_(focal_length) {
 }
 
+void Outputs::ImageWindowOutput::accept(
+    const std::vector<dynamic_vino_lib::PersonReidentificationResult>& results) {
+  if (outputs_.size() == 0) {
+    initOutputs(results.size());
+  }
+  if (outputs_.size() != results.size()) {
+    // throw std::logic_error("size is not equal!");
+    slog::err << "the size of Person Reidentification and Output Vector is not equal!"
+              << slog::endl;
+    return;
+  }
+  for (unsigned i = 0; i < results.size(); i++) {
+    outputs_[i].rect = results[i].getLocation();
+    auto person_id = results[i].getPersonID();
+    outputs_[i].desc += "[" + person_id + "]";
+  }
+} 
+
 void Outputs::ImageWindowOutput::feedFrame(const cv::Mat& frame) {
   // frame_ = frame;
   frame_ = frame.clone();

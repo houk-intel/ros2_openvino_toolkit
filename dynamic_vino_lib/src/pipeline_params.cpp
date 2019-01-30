@@ -44,6 +44,7 @@ const std::string kInferTpye_EmotionRecognition = "EmotionRecognition";
 const std::string kInferTpye_HeadPoseEstimation = "HeadPoseEstimation";
 const std::string kInferTpye_ObjectDetection = "ObjectDetection";
 const std::string kInferTpye_ObjectSegmentation = "ObjectSegmentation";
+const std::string kInferTpye_PersonReidentification = "PersonReidentification";
 
 PipelineParams::PipelineParams(const std::string& name) { params_.name = name; }
 
